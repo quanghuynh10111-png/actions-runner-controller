@@ -6,15 +6,16 @@ tests:
     set:
       controller:
         pod:
-          nodeSelector:
-            kubernetes.io/os: linux
-          tolerations:
-            - key: "dedicated"
-              operator: "Equal"
-              value: "arc"
-              effect: "NoSchedule"
-          hostNetwork: true
-          dnsPolicy: "ClusterFirstWithHostNet"
+          spec:
+            nodeSelector:
+              kubernetes.io/os: linux
+            tolerations:
+              - key: "dedicated"
+                operator: "Equal"
+                value: "arc"
+                effect: "NoSchedule"
+            hostNetwork: true
+            dnsPolicy: "ClusterFirstWithHostNet"
     release:
       name: "test-name"
       namespace: "test-namespace"
@@ -39,7 +40,8 @@ tests:
     set:
       controller:
         pod:
-          serviceAccountName: "hacker-sa"
+          spec:
+            serviceAccountName: "hacker-sa"
     release:
       name: "test-name"
       namespace: "test-namespace"

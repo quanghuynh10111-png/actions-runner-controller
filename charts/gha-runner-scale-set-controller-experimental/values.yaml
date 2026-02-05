@@ -55,8 +55,6 @@ controller:
       securityContext: {}
       # Container-level resource requests/limits.
       resources: {}
-      # Additional volume mounts on the manager container.
-      extraVolumeMounts: []
       # Extra container ports (metrics port is derived from controller.metrics).
       extraPorts: []
 
@@ -74,34 +72,31 @@ controller:
     metadata:
       labels: {}
       annotations: {}
-    spec: {}
-    # Pod-level security context.
-    securityContext: {}
-    # Pod priority class name.
-    priorityClassName: ""
-    # Node selection constraints.
-    nodeSelector: {}
-    # Pod tolerations.
-    tolerations: []
-    # Pod affinity.
-    affinity: {}
-    # Pod topology spread constraints.
-    topologySpreadConstraints: []
-    # Pod termination grace period (overrides default 10s).
-    terminationGracePeriodSeconds: null
 
-    # Extra volumes appended to the default ones.
-    extraVolumes: []
-    # Extra volume mounts appended to the default ones.
-    extraVolumeMounts: []
+    # PodSpec fields applied to spec.template.spec.
+    # Note: containers provided here are appended after the built-in manager container.
+    spec:
+      # Pod-level security context.
+      securityContext: {}
+      # Pod priority class name.
+      priorityClassName: ""
+      # Node selection constraints.
+      nodeSelector: {}
+      # Pod tolerations.
+      tolerations: []
+      # Pod affinity.
+      affinity: {}
+      # Pod topology spread constraints.
+      topologySpreadConstraints: []
+      # Pod termination grace period (overrides default 10s).
+      terminationGracePeriodSeconds: null
+      # Additional volumes appended to the default ones.
+      volumes: []
+      # Additional containers appended after the manager container.
+      containers: []
 
-    # Raw extra podSpec fields to be merged into spec.template.spec.
-    # Example:
-    # extraSpec:
-    #   hostAliases:
-    #   - ip: "127.0.0.1"
-    #     hostnames: ["example.local"]
-    extraSpec: {}
+    # Additional volume mounts appended to the manager container's default ones.
+    volumeMounts: []
 
   # Metrics configuration. If omitted, metrics are disabled.
   # metrics:

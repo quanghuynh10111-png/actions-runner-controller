@@ -6,16 +6,17 @@ tests:
     set:
       controller:
         pod:
-          containers:
-            - name: "sidecar"
-              image: "busybox:1.36"
-              command:
-                - "sh"
-                - "-c"
-              args:
-                - "echo hello && sleep 3600"
-            - name: "another"
-              image: "alpine:3.19"
+          spec:
+            containers:
+              - name: "sidecar"
+                image: "busybox:1.36"
+                command:
+                  - "sh"
+                  - "-c"
+                args:
+                  - "echo hello && sleep 3600"
+              - name: "another"
+                image: "alpine:3.19"
     release:
       name: "test-name"
       namespace: "test-namespace"

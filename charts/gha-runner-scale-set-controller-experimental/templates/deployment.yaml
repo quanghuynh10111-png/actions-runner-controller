@@ -17,6 +17,16 @@ spec:
       labels:
         {{- include "gha-controller-template.labels" . | nindent 8 }}
     spec:
+      {{- $pod := (.Values.controller.pod | default dict) -}}
+      {{- if and (hasKey .Values.controller "pod") (not (kindIs "map" $pod)) -}}
+        {{- fail "controller.pod must be an object" -}}
+      {{- end -}}
+      {{- $podSpec := (index $pod "spec" | default dict) -}}
+      {{- if and (hasKey $pod "spec") (not (kindIs "map" $podSpec)) -}}
+        {{- fail "controller.pod.spec must be an object" -}}
+      {{- end -}}
+
+
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -25,18 +35,20 @@ spec:
       containers:
         -
       {{- include "gha-controller-template.manager-container" . | nindent 10 }}
-        {{- range .Values.controller.pod.containers }}
+        {{- $extraContainers := (index $podSpec "containers" | default list) -}}
+        {{- range $extraContainers }}
         -
       {{- toYaml . | nindent 10 }}
         {{- end }}
-      terminationGracePeriodSeconds: {{ default 10 .Values.controller.pod.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ default 10 (index $podSpec "terminationGracePeriodSeconds") }}
       volumes:
         - name: tmp
           emptyDir: {}
-      {{- range .Values.controller.pod.extraVolumes }}
+      {{- $podVolumes := (index $podSpec "volumes" | default list) -}}
+      {{- range $podVolumes }}
         - {{- toYaml . | nindent 10 }}
       {{- end }}
-      {{- $runnerPodSpecExtraFields := (omit .Values.controller.pod "containers" "serviceAccountName" "terminationGracePeriodSeconds") -}}
+      {{- $runnerPodSpecExtraFields := (omit $podSpec "containers" "serviceAccountName" "terminationGracePeriodSeconds" "volumes") -}}
       {{- if gt (len $runnerPodSpecExtraFields) 0 }}
       {{- toYaml $runnerPodSpecExtraFields | nindent 6 }}
       {{- end }}

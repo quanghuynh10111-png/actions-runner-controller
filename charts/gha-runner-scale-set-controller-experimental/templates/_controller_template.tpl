@@ -115,12 +115,8 @@ securityContext:
 volumeMounts:
   - mountPath: /tmp
     name: tmp
-  {{- with .Values.controller.manager.container.extraVolumeMounts }}
-  {{- range . }}
-  - {{- toYaml . | nindent 4 }}
-  {{- end }}
-  {{- end }}
-  {{- range .Values.controller.pod.extraVolumeMounts }}
+  {{- $podVolumeMounts := (.Values.controller.pod.volumeMounts | default list) -}}
+  {{- range $podVolumeMounts }}
   - {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
