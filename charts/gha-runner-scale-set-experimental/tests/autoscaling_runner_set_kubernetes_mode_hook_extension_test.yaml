@@ -41,6 +41,30 @@ tests:
             subPath: extension
             readOnly: true
 
+  - it: should mount helper-derived default hook extension name when inline extension has no metadata.name
+    set:
+      scaleset.name: "test"
+      auth.url: "https://github.com/org"
+      auth.githubToken: "gh_token12345"
+      controllerServiceAccount.name: "arc"
+      controllerServiceAccount.namespace: "arc-system"
+      runner:
+        mode: "kubernetes"
+        kubernetesMode:
+          hookPath: "/home/runner/k8s/index.js"
+          extension:
+            yaml: "foo: bar"
+    release:
+      name: "test-name"
+      namespace: "test-namespace"
+    asserts:
+      - contains:
+          path: spec.template.spec.volumes
+          content:
+            name: hook-extension
+            configMap:
+              name: test-name-hook-extension
+
   - it: should mount hook extension ConfigMap when extensionRef is set
     set:
       scaleset.name: "test"

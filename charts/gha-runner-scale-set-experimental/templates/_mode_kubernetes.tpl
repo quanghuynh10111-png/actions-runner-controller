@@ -101,7 +101,7 @@ volumeMounts:
 {{- if $hasExtension }}
 - name: hook-extension
   configMap:
-    name: {{ if not (empty $extensionRef) }}{{ $extensionRef | quote }}{{ else }}{{ include "kube-mode-extension.name" . | quote }}{{ end }}
+    name: {{ if not (empty $extensionRef) }}{{ $extensionRef | quote }}{{ else }}{{ include "runner-mode-kubernetes.extension-name" . | quote }}{{ end }}
 {{- end }}
 
 {{- end }}

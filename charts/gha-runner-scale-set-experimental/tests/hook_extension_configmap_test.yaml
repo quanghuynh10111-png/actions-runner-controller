@@ -10,14 +10,14 @@ tests:
           extension:
             metadata:
               name: "my-hook-extension"
-              namespace: "test-namespace"
+              namespace: "ignored-by-chart"
             yaml: |
               foo: bar
               nested:
                 a: 1
     release:
       name: "test-name"
-      namespace: "ignored-by-test" # overridden by extension.metadata.namespace above
+      namespace: "test-namespace"
     asserts:
       - equal:
           path: apiVersion
@@ -37,6 +37,26 @@ tests:
             foo: bar
             nested:
               a: 1
+
+  - it: should use helper-derived default name when extension metadata.name is empty
+    set:
+      runner:
+        mode: "kubernetes"
+        kubernetesMode:
+          extension:
+            metadata:
+              name: ""
+            yaml: "foo: bar"
+    release:
+      name: "test-name"
+      namespace: "test-namespace"
+    asserts:
+      - equal:
+          path: metadata.name
+          value: test-name-hook-extension
+      - equal:
+          path: metadata.namespace
+          value: test-namespace
 
   - it: should not render when extension.yaml is empty
     set:

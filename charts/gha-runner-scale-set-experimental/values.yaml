@@ -115,7 +115,7 @@ resource:
     metadata:
       labels: {}
       annotations: {}
-      
+
   # Specifies metadata that will be applied to the no-permission ServiceAccount
   # (created for non-kubernetes runner modes).
   noPermissionServiceAccount:
@@ -152,12 +152,12 @@ runner:
   # - "" (default) - no additional configuration is applied
   # - "kubernetes" - configuration for running jobs in Kubernetes mode is applied
   # - "dind" - configuration for running jobs in Docker-in-Docker mode is
-  # 
+  #
   # For each mode, we provide configuration out of the box that works for most use
   # cases. You can customize our configuration by modifying the fields below,
   # or you can leave mode empty and provide your own complete configuration.
   mode: ""
-  
+
   pod:
     metadata:
       labels: {}
@@ -178,7 +178,7 @@ runner:
       containers: []
       initContainers: []
       volumes: []
-    
+
   # container field is applied to the container named "runner". You cannot override the name of the runner container
   container:
     image: "ghcr.io/actions/actions-runner:latest"
@@ -196,12 +196,14 @@ runner:
     serviceAccountName: ""
     hookPath: "/home/runner/k8s/index.js"
     requireJobContainer: true
-    extensionRef: ""
-    extension:
-      metadata:
-        name: ""
-        namespace: ""
-      yaml: ""
+    # extensionRef: ""
+    # extension:
+    ## metadata adds metadata to the config map configured for the hook extension
+    ## NOTE: namespace field is ignored.
+    #   metadata:
+    #     labels: ""
+    #     namespace: ""
+    #   yaml: ""
 
 ## A self-signed CA certificate for communication with the GitHub server can be
 ## provided using a config map key selector. If `runnerMountPath` is set, for

@@ -31,7 +31,7 @@ The name of the GitHub secret used for authentication.
 {{- if not (empty .Values.auth.secretName) -}}
   {{- .Values.auth.secretName -}}
 {{- else -}}
-  {{- include "autoscaling-runner-set.name" . }}-github-secret
+  {{- printf "%s-github-secret" (include "autoscaling-runner-set.name" .) -}}
 {{- end -}}
 {{- end }}
 
@@ -114,4 +114,22 @@ It defaults to ghcr.io/actions/actions-runner:latest if not specified.
   {{- fail "runner.container.command must be a list/array" -}}
 {{- end -}}
 {{- toJson $command -}}
+{{- end }}
+
+{{/*
+Hook extension ConfigMap name for kubernetes runner mode.
+
+If runner.kubernetesMode.extension.metadata.name is set, use it.
+Otherwise, default to a name derived from the scale set name.
+*/}}
+{{- define "runner-mode-kubernetes.extension-name" -}}
+{{- $runner := (.Values.runner | default dict) -}}
+{{- $kubeMode := (index $runner "kubernetesMode" | default dict) -}}
+{{- $extension := (index $kubeMode "extension" | default dict) -}}
+{{- $meta := (index $extension "metadata" | default dict) -}}
+{{- $name := (index $meta "name" | default "") -}}
+{{- if not (kindIs "string" $name) -}}
+  {{- fail "runner.kubernetesMode.extension.metadata.name must be a string" -}}
+{{- end -}}
+{{- default (printf "%s-hook-extension" (include "autoscaling-runner-set.name" .) | trunc 63 | trimSuffix "-") $name -}}
 {{- end }}
