@@ -4,11 +4,21 @@
 {{- $hookPath := (index $kubeMode "hookPath" | default "/home/runner/k8s/index.js") -}}
 {{- $extensionRef := (index $kubeMode "extensionRef" | default "") -}}
 {{- $extension := (index $kubeMode "extension" | default dict) -}}
-{{- $extensionYaml := "" -}}
+{{- $extensionYamlRaw := "" -}}
 {{- if kindIs "map" $extension -}}
-  {{- $extensionYaml = (index $extension "yaml" | default "") -}}
+  {{- if hasKey $extension "yaml" -}}
+    {{- $extensionYamlRaw = (index $extension "yaml") -}}
+  {{- end -}}
 {{- end -}}
-{{- $hasExtension := or (not (empty $extensionRef)) (not (empty $extensionYaml)) -}}
+{{- $extensionYamlStr := "" -}}
+{{- if empty $extensionYamlRaw -}}
+  {{- $extensionYamlStr = "" -}}
+{{- else if kindIs "string" $extensionYamlRaw -}}
+  {{- $extensionYamlStr = $extensionYamlRaw -}}
+{{- else if kindIs "map" $extensionYamlRaw -}}
+  {{- $extensionYamlStr = toYaml $extensionYamlRaw -}}
+{{- end -}}
+{{- $hasExtension := or (not (empty $extensionRef)) (not (empty $extensionYamlStr)) -}}
 {{- $hookTemplatePath := printf "%s/hook-template.yaml" (dir $hookPath) -}}
 {{- $setHookTemplateEnv := true -}}
 {{- $userEnv := (.Values.runner.env | default list) -}}
@@ -28,8 +38,8 @@
 {{- if and (empty $extensionRef) (hasKey $kubeMode "extension") (not (kindIs "map" $extension)) -}}
   {{- fail "runner.kubernetesMode.extension must be an object when runner.kubernetesMode.extensionRef is empty" -}}
 {{- end -}}
-{{- if and (empty $extensionRef) (not (kindIs "string" $extensionYaml)) -}}
-  {{- fail "runner.kubernetesMode.extension.yaml must be a string" -}}
+{{- if and (empty $extensionRef) (not (empty $extensionYamlRaw)) (not (or (kindIs "string" $extensionYamlRaw) (kindIs "map" $extensionYamlRaw))) -}}
+  {{- fail "runner.kubernetesMode.extension.yaml must be a string or an object" -}}
 {{- end -}}
 {{- $requireJobContainer := true -}}
 {{- if hasKey $kubeMode "requireJobContainer" -}}
@@ -73,11 +83,21 @@ volumeMounts:
 {{- $kubeMode := (index $runner "kubernetesMode" | default dict) -}}
 {{- $extensionRef := (index $kubeMode "extensionRef" | default "") -}}
 {{- $extension := (index $kubeMode "extension" | default dict) -}}
-{{- $extensionYaml := "" -}}
+{{- $extensionYamlRaw := "" -}}
 {{- if kindIs "map" $extension -}}
-  {{- $extensionYaml = (index $extension "yaml" | default "") -}}
+  {{- if hasKey $extension "yaml" -}}
+    {{- $extensionYamlRaw = (index $extension "yaml") -}}
+  {{- end -}}
 {{- end -}}
-{{- $hasExtension := or (not (empty $extensionRef)) (not (empty $extensionYaml)) -}}
+{{- $extensionYamlStr := "" -}}
+{{- if empty $extensionYamlRaw -}}
+  {{- $extensionYamlStr = "" -}}
+{{- else if kindIs "string" $extensionYamlRaw -}}
+  {{- $extensionYamlStr = $extensionYamlRaw -}}
+{{- else if kindIs "map" $extensionYamlRaw -}}
+  {{- $extensionYamlStr = toYaml $extensionYamlRaw -}}
+{{- end -}}
+{{- $hasExtension := or (not (empty $extensionRef)) (not (empty $extensionYamlStr)) -}}
 {{- $claim := (index $kubeMode "workVolumeClaim" | default dict) -}}
 {{- if and (not (empty $claim)) (not (kindIs "map" $claim)) -}}
   {{- fail "runner.kubernetesMode.workVolumeClaim must be a map/object" -}}
@@ -88,8 +108,8 @@ volumeMounts:
 {{- if and (empty $extensionRef) (hasKey $kubeMode "extension") (not (kindIs "map" $extension)) -}}
   {{- fail "runner.kubernetesMode.extension must be an object when runner.kubernetesMode.extensionRef is empty" -}}
 {{- end -}}
-{{- if and (empty $extensionRef) (not (kindIs "string" $extensionYaml)) -}}
-  {{- fail "runner.kubernetesMode.extension.yaml must be a string" -}}
+{{- if and (empty $extensionRef) (not (empty $extensionYamlRaw)) (not (or (kindIs "string" $extensionYamlRaw) (kindIs "map" $extensionYamlRaw))) -}}
+  {{- fail "runner.kubernetesMode.extension.yaml must be a string or an object" -}}
 {{- end -}}
 {{- $defaultClaim := dict "accessModes" (list "ReadWriteOnce") "storageClassName" "local-path" "resources" (dict "requests" (dict "storage" "1Gi")) -}}
 {{- $claimSpec := mergeOverwrite $defaultClaim $claim -}}

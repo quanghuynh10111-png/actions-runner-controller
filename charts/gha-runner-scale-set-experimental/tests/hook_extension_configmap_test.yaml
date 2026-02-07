@@ -11,7 +11,7 @@ tests:
             metadata:
               name: "my-hook-extension"
               namespace: "ignored-by-chart"
-            yaml: |
+            yaml:
               foo: bar
               nested:
                 a: 1
@@ -67,7 +67,7 @@ tests:
             metadata:
               name: "my-hook-extension"
               namespace: "test-namespace"
-            yaml: ""
+            yaml: {}
     release:
       name: "test-name"
       namespace: "test-namespace"
@@ -85,7 +85,7 @@ tests:
             metadata:
               name: "my-hook-extension"
               namespace: "test-namespace"
-            yaml: |
+            yaml:
               foo: bar
     release:
       name: "test-name"

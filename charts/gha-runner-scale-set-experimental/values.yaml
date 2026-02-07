@@ -196,6 +196,23 @@ runner:
     serviceAccountName: ""
     hookPath: "/home/runner/k8s/index.js"
     requireJobContainer: true
+    # workVolumeClaim configures the *ephemeral* PVC used for the runner work directory
+    # (mounted at /home/runner/_work).
+    #
+    # This maps directly to `spec.template.spec.volumes[].ephemeral.volumeClaimTemplate.spec`.
+    # Any fields you set here are merged onto the chart defaults.
+    #
+    # Defaults:
+    # - accessModes: ["ReadWriteOnce"]
+    # - storageClassName: "local-path"
+    # - resources.requests.storage: "1Gi"
+    workVolumeClaim: {}
+    # workVolumeClaim:
+    #   accessModes: ["ReadWriteOnce"]
+    #   storageClassName: "fast-ssd"
+    #   resources:
+    #     requests:
+    #       storage: 10Gi
     # extensionRef: ""
     # extension:
     ## metadata adds metadata to the config map configured for the hook extension
@@ -203,7 +220,11 @@ runner:
     #   metadata:
     #     labels: ""
     #     namespace: ""
-    #   yaml: ""
+    #   yaml:
+    #     metadata:
+    #       annotations:
+    #     spec:
+    #       containers: []
 
 ## A self-signed CA certificate for communication with the GitHub server can be
 ## provided using a config map key selector. If `runnerMountPath` is set, for

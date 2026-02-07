@@ -14,24 +14,33 @@
 
   {{- $extensionMeta := dict -}}
   {{- $extensionName := "" -}}
-  {{- $extensionYaml := "" -}}
+  {{- $extensionYamlRaw := "" -}}
+  {{- $extensionYamlStr := "" -}}
   {{- if kindIs "map" $extension -}}
     {{- $extensionMeta = (index $extension "metadata" | default dict) -}}
     {{- if not (kindIs "map" $extensionMeta) -}}
       {{- fail "runner.kubernetesMode.extension.metadata must be an object" -}}
     {{- end -}}
     {{- $extensionName = (index $extensionMeta "name" | default "") -}}
-    {{- $extensionYaml = (index $extension "yaml" | default "") -}}
+    {{- if hasKey $extension "yaml" -}}
+      {{- $extensionYamlRaw = (index $extension "yaml") -}}
+    {{- end -}}
   {{- end -}}
 
   {{- if not (kindIs "string" $extensionName) -}}
     {{- fail "runner.kubernetesMode.extension.metadata.name must be a string" -}}
   {{- end -}}
-  {{- if not (kindIs "string" $extensionYaml) -}}
-    {{- fail "runner.kubernetesMode.extension.yaml must be a string" -}}
+  {{- if empty $extensionYamlRaw -}}
+    {{- $extensionYamlStr = "" -}}
+  {{- else if kindIs "string" $extensionYamlRaw -}}
+    {{- $extensionYamlStr = $extensionYamlRaw -}}
+  {{- else if kindIs "map" $extensionYamlRaw -}}
+    {{- $extensionYamlStr = toYaml $extensionYamlRaw -}}
+  {{- else -}}
+    {{- fail "runner.kubernetesMode.extension.yaml must be a string or an object" -}}
   {{- end -}}
 
-  {{- if not (empty $extensionYaml) -}}
+  {{- if not (empty $extensionYamlStr) -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -46,6 +55,6 @@ metadata:
   {{- end }}
 data:
   extension: |-
-{{ $extensionYaml | indent 4 }}
+{{ $extensionYamlStr | indent 4 }}
   {{- end -}}
 {{- end -}}
