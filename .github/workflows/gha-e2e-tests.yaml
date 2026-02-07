@@ -49,6 +49,12 @@ jobs:
           GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
         shell: bash
 
+      - name: Run default setup test
+        run: hack/e2e-test.sh default-setup-v2
+        env:
+          GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
+        shell: bash
+
   single-namespace-setup:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -65,9 +71,13 @@ jobs:
           application_id: ${{ secrets.E2E_TESTS_ACCESS_APP_ID }}
           application_private_key: ${{ secrets.E2E_TESTS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
-
       - name: Run single namespace setup test
         run: hack/e2e-test.sh single-namespace-setup
+        env:
+          GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
+        shell: bash
+      - name: Run single namespace setup test
+        run: hack/e2e-test.sh single-namespace-setup-v2
         env:
           GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
         shell: bash
@@ -88,7 +98,11 @@ jobs:
           application_id: ${{ secrets.E2E_TESTS_ACCESS_APP_ID }}
           application_private_key: ${{ secrets.E2E_TESTS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
-
+      - name: Run dind mode setup test
+        run: hack/e2e-test.sh dind-mode-setup-v2
+        env:
+          GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
+        shell: bash
       - name: Run dind mode setup test
         run: hack/e2e-test.sh dind-mode-setup
         env:
@@ -111,7 +125,11 @@ jobs:
           application_id: ${{ secrets.E2E_TESTS_ACCESS_APP_ID }}
           application_private_key: ${{ secrets.E2E_TESTS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
-
+      - name: Run kubernetes mode setup test
+        run: hack/e2e-test.sh kubernetes-mode-setup-v2
+        env:
+          GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
+        shell: bash
       - name: Run kubernetes mode setup test
         run: hack/e2e-test.sh kubernetes-mode-setup
         env:
@@ -134,7 +152,11 @@ jobs:
           application_id: ${{ secrets.E2E_TESTS_ACCESS_APP_ID }}
           application_private_key: ${{ secrets.E2E_TESTS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
-
+      - name: Run single namespace setup test
+        run: hack/e2e-test.sh single-namespace-setup-v2
+        env:
+          GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
+        shell: bash
       - name: Run single namespace setup test
         run: hack/e2e-test.sh single-namespace-setup
         env:
@@ -157,7 +179,11 @@ jobs:
           application_id: ${{ secrets.E2E_TESTS_ACCESS_APP_ID }}
           application_private_key: ${{ secrets.E2E_TESTS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
-
+      - name: Run anonymous proxy setup test
+        run: hack/e2e-test.sh anonymous-proxy-setup-v2
+        env:
+          GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
+        shell: bash
       - name: Run anonymous proxy setup test
         run: hack/e2e-test.sh anonymous-proxy-setup
         env:
@@ -180,7 +206,11 @@ jobs:
           application_id: ${{ secrets.E2E_TESTS_ACCESS_APP_ID }}
           application_private_key: ${{ secrets.E2E_TESTS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
-
+      - name: Run self signed CA setup test
+        run: hack/e2e-test.sh self-signed-ca-setup-v2
+        env:
+          GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
+        shell: bash
       - name: Run self signed CA setup test
         run: hack/e2e-test.sh self-signed-ca-setup
         env:
@@ -203,7 +233,11 @@ jobs:
           application_id: ${{ secrets.E2E_TESTS_ACCESS_APP_ID }}
           application_private_key: ${{ secrets.E2E_TESTS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
-
+      - name: Run update strategy test
+        run: hack/e2e-test.sh update-strategy-v2
+        env:
+          GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
+        shell: bash
       - name: Run update strategy test
         run: hack/e2e-test.sh update-strategy
         env:
@@ -226,6 +260,11 @@ jobs:
           application_id: ${{ secrets.E2E_TESTS_ACCESS_APP_ID }}
           application_private_key: ${{ secrets.E2E_TESTS_ACCESS_PK }}
           organization: ${{ env.TARGET_ORG }}
+      - name: Run init with min runners test
+        run: hack/e2e-test.sh init-with-min-runners-v2
+        env:
+          GITHUB_TOKEN: "${{steps.config-token.outputs.token}}"
+        shell: bash
 
       - name: Run init with min runners test
         run: hack/e2e-test.sh init-with-min-runners
