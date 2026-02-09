@@ -66,13 +66,21 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Install helm-unittest
-        if: contains(steps.list-changed.outputs.changed_charts, 'charts/gha-runner-scale-set-controller-experimental')
+        if: |
+          contains(steps.list-changed.outputs.changed_charts, 'charts/gha-runner-scale-set-controller-experimental') ||
+          contains(steps.list-changed.outputs.changed_charts, 'charts/gha-runner-scale-set-experimental')
         run: |
           helm plugin install https://github.com/helm-unittest/helm-unittest.git
+
       - name: Run helm-unittest (gha-runner-scale-set-controller-experimental)
         if: contains(steps.list-changed.outputs.changed_charts, 'charts/gha-runner-scale-set-controller-experimental')
         run: |
           helm unittest ./charts/gha-runner-scale-set-controller-experimental/
+
+      - name: Run helm-unittest (gha-runner-scale-set-experimental)
+        if: contains(steps.list-changed.outputs.changed_charts, 'charts/gha-runner-scale-set-experimental')
+        run: |
+          helm unittest ./charts/gha-runner-scale-set-experimental/
 
       - name: Run chart-testing (lint)
         run: |

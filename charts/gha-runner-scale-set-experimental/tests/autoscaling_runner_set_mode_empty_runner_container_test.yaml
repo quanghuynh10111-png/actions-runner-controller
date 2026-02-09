@@ -85,7 +85,7 @@ tests:
         mode: ""
         container:
           name: "not-runner"
-          image: "example.com/custom-runner:1"
+          image: "ghcr.io/actions/actions-runner:latest"
           command: ["sh", "-c", "echo hi"]
           args: ["--foo"]
     release:
@@ -97,7 +97,7 @@ tests:
           value: runner
       - equal:
           path: spec.template.spec.containers[0].image
-          value: example.com/custom-runner:1
+          value: ghcr.io/actions/actions-runner:latest
       - equal:
           path: spec.template.spec.containers[0].command[0]
           value: sh

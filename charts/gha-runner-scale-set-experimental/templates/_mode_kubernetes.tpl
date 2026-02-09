@@ -1,6 +1,12 @@
 {{- define "runner-mode-kubernetes.runner-container" -}}
 {{- $runner := (.Values.runner | default dict) -}}
 {{- $kubeMode := (index $runner "kubernetesMode" | default dict) -}}
+{{- $tlsConfig := (default (dict) .Values.githubServerTLS) -}}
+{{- $tlsMountPath := (index $tlsConfig "runnerMountPath" | default "") -}}
+{{- $tlsCertKey := "" -}}
+{{- if $tlsMountPath -}}
+  {{- $tlsCertKey = required "githubServerTLS.certificateFrom.configMapKeyRef.key is required when githubServerTLS.runnerMountPath is set" (index $tlsConfig "certificateFrom" "configMapKeyRef" "key") -}}
+{{- end -}}
 {{- $hookPath := (index $kubeMode "hookPath" | default "/home/runner/k8s/index.js") -}}
 {{- $extensionRef := (index $kubeMode "extensionRef" | default "") -}}
 {{- $extension := (index $kubeMode "extension" | default dict) -}}
@@ -51,6 +57,24 @@
 name: runner
 image: {{ include "runner.image" . | quote }}
 command: {{ include "runner.command" . }}
+
+{{ $setNodeExtraCaCerts := false -}}
+{{ $setRunnerUpdateCaCerts := false -}}
+{{ $userEnv := (.Values.runner.env | default list) -}}
+{{ if $tlsMountPath -}}
+  {{- $setNodeExtraCaCerts = true -}}
+  {{- $setRunnerUpdateCaCerts = true -}}
+  {{- if kindIs "slice" $userEnv -}}
+    {{- range $userEnv -}}
+      {{- if and (kindIs "map" .) (eq ((index . "name") | default "") "NODE_EXTRA_CA_CERTS") -}}
+        {{- $setNodeExtraCaCerts = false -}}
+      {{- end -}}
+      {{- if and (kindIs "map" .) (eq ((index . "name") | default "") "RUNNER_UPDATE_CA_CERTS") -}}
+        {{- $setRunnerUpdateCaCerts = false -}}
+      {{- end -}}
+    {{- end -}}
+  {{- end -}}
+{{ end -}}
 env:
   - name: ACTIONS_RUNNER_CONTAINER_HOOKS
     value: {{ $hookPath | quote }}
@@ -67,6 +91,14 @@ env:
   {{- with .Values.runner.env }}
     {{- toYaml . | nindent 2 }}
   {{- end }}
+  {{- if $setNodeExtraCaCerts }}
+  - name: NODE_EXTRA_CA_CERTS
+    value: {{ printf "%s/%s" (trimSuffix "/" $tlsMountPath) $tlsCertKey | quote }}
+  {{- end }}
+  {{- if $setRunnerUpdateCaCerts }}
+  - name: RUNNER_UPDATE_CA_CERTS
+    value: "1"
+  {{- end }}
 volumeMounts:
   - name: work
     mountPath: /home/runner/_work
@@ -76,11 +108,24 @@ volumeMounts:
     subPath: extension
     readOnly: true
   {{- end }}
+  {{- if $tlsMountPath }}
+  - name: github-server-tls-cert
+    mountPath: {{ $tlsMountPath | quote }}
+    readOnly: true
+  {{- end }}
 {{- end }}
 
 {{- define "runner-mode-kubernetes.pod-volumes" -}}
 {{- $runner := (.Values.runner | default dict) -}}
 {{- $kubeMode := (index $runner "kubernetesMode" | default dict) -}}
+{{- $tlsConfig := (default (dict) .Values.githubServerTLS) -}}
+{{- $tlsMountPath := (index $tlsConfig "runnerMountPath" | default "") -}}
+{{- $tlsConfigMapName := "" -}}
+{{- $tlsCertKey := "" -}}
+{{- if $tlsMountPath -}}
+  {{- $tlsConfigMapName = required "githubServerTLS.certificateFrom.configMapKeyRef.name is required when githubServerTLS.runnerMountPath is set" (index $tlsConfig "certificateFrom" "configMapKeyRef" "name") -}}
+  {{- $tlsCertKey = required "githubServerTLS.certificateFrom.configMapKeyRef.key is required when githubServerTLS.runnerMountPath is set" (index $tlsConfig "certificateFrom" "configMapKeyRef" "key") -}}
+{{- end -}}
 {{- $extensionRef := (index $kubeMode "extensionRef" | default "") -}}
 {{- $extension := (index $kubeMode "extension" | default dict) -}}
 {{- $extensionYamlRaw := "" -}}
@@ -122,6 +167,15 @@ volumeMounts:
 - name: hook-extension
   configMap:
     name: {{ if not (empty $extensionRef) }}{{ $extensionRef | quote }}{{ else }}{{ include "runner-mode-kubernetes.extension-name" . | quote }}{{ end }}
+{{- end }}
+
+{{- if $tlsMountPath }}
+- name: github-server-tls-cert
+  configMap:
+    name: {{ $tlsConfigMapName | quote }}
+    items:
+      - key: {{ $tlsCertKey | quote }}
+        path: {{ $tlsCertKey | quote }}
 {{- end }}
 
 {{- end }}

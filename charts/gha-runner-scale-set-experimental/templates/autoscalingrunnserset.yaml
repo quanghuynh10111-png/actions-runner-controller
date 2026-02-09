@@ -50,8 +50,10 @@
 {{- if not (kindIs "slice" $extraVolumes) -}}
   {{- fail ".Values.runner.pod.spec.volumes must be a list of volume specifications" -}}
 {{- end }}
+{{- $tlsConfig := (default (dict) .Values.githubServerTLS) -}}
+{{- $tlsMountPath := (index $tlsConfig "runnerMountPath" | default "") -}}
 {{- $hasInitContainers := or (gt (len $extraInitContainers) 0) (eq $runnerMode "dind") -}}
-{{- $hasVolumes := or (gt (len $extraVolumes) 0) (eq $runnerMode "kubernetes") (eq $runnerMode "dind") -}}
+{{- $hasVolumes := or (gt (len $extraVolumes) 0) (eq $runnerMode "kubernetes") (eq $runnerMode "dind") (not (empty $tlsMountPath)) -}}
 apiVersion: actions.github.com/v1alpha1
 kind: AutoscalingRunnerSet
 metadata:
