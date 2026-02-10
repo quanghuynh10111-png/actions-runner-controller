@@ -24,7 +24,7 @@ Annotations applied to the controller Pod template (spec.template.metadata.annot
 {{- define "gha-controller-template.manager-container" -}}
 name: manager
 image: "{{ .Values.controller.manager.container.image }}"
-imagePullPolicy: {{ default .Values.controller.manager.container.pullPolicy "IfNotPresent" }}
+imagePullPolicy: {{ default "IfNotPresent" .Values.controller.manager.container.pullPolicy }}
 command:
   - "/manager"
 args:

@@ -19,7 +19,3 @@ app.kubernetes.io/name: {{ include "gha-controller.name" . }}
 app.kubernetes.io/namespace: {{ include "gha-controller.namespace" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
-
-{{- define "gha-controller.labels" -}}
-{{- include "gha-controller.labels" . -}}
-{{- end }}
