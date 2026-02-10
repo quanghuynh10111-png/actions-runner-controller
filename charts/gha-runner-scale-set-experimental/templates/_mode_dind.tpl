@@ -1,10 +1,4 @@
 {{- define "runner-mode-dind.runner-container" -}}
-{{- $tlsConfig := (default (dict) .Values.githubServerTLS) -}}
-{{- $tlsMountPath := (index $tlsConfig "runnerMountPath" | default "") -}}
-{{- $tlsCertKey := "" -}}
-{{- if $tlsMountPath -}}
-  {{- $tlsCertKey = required "githubServerTLS.certificateFrom.configMapKeyRef.key is required when githubServerTLS.runnerMountPath is set" (index $tlsConfig "certificateFrom" "configMapKeyRef" "key") -}}
-{{- end -}}
 name: runner
 image: {{ include "runner.image" . | quote }}
 command: {{ include "runner.command" . }}
@@ -15,22 +9,13 @@ env:
   {{- with .Values.runner.env }}
     {{- toYaml . | nindent 2 }}
   {{- end }}
-  {{- if $tlsMountPath }}
-  - name: NODE_EXTRA_CA_CERTS
-    value: {{ printf "%s/%s" (trimSuffix "/" $tlsMountPath) $tlsCertKey | quote }}
-  - name: RUNNER_UPDATE_CA_CERTS
-    value: "1"
-  {{- end }}
+  {{ include "githubServerTLS.envItems" (dict "root" $ "existingEnv" (.Values.runner.env | default list)) | nindent 2 }}
 volumeMounts:
   - name: work
     mountPath: /home/runner/_work
   - name: dind-sock
     mountPath: {{ include "runner-mode-dind.sock-mount-dir" . | quote }}
-  {{- if $tlsMountPath }}
-  - name: github-server-tls-cert
-    mountPath: {{ $tlsMountPath | quote }}
-    readOnly: true
-  {{- end }}
+  {{ include "githubServerTLS.volumeMountItem" (dict "root" $ "existingVolumeMounts" (list)) | nindent 2 }}
 {{- end }}
 
 {{- define "runner-mode-dind.dind-container" -}}
@@ -63,26 +48,11 @@ volumeMounts:
 {{- end }}
 
 {{- define "runner-mode-dind.pod-volumes" -}}
-{{- $tlsConfig := (default (dict) .Values.githubServerTLS) -}}
-{{- $tlsMountPath := (index $tlsConfig "runnerMountPath" | default "") -}}
-{{- $tlsCMName := "" -}}
-{{- $tlsCertKey := "" -}}
-{{- if $tlsMountPath -}}
-  {{- $tlsCMName = required "githubServerTLS.certificateFrom.configMapKeyRef.name is required when githubServerTLS.runnerMountPath is set" (index $tlsConfig "certificateFrom" "configMapKeyRef" "name") -}}
-  {{- $tlsCertKey = required "githubServerTLS.certificateFrom.configMapKeyRef.key is required when githubServerTLS.runnerMountPath is set" (index $tlsConfig "certificateFrom" "configMapKeyRef" "key") -}}
-{{- end -}}
 - name: work
   emptyDir: {}
 - name: dind-sock
   emptyDir: {}
-{{- if $tlsMountPath }}
-- name: github-server-tls-cert
-  configMap:
-    name: {{ $tlsCMName | quote }}
-    items:
-      - key: {{ $tlsCertKey | quote }}
-        path: {{ $tlsCertKey | quote }}
-{{- end }}
+{{ include "githubServerTLS.podVolumeItem" . }}
 {{- if .Values.runner.dind.copyExternals }}
 - name: dind-externals
   emptyDir: {}
