@@ -50,7 +50,7 @@ tests:
           value: runner
       - equal:
           path: spec.template.spec.containers[0].image
-          value: ghcr.io/actions/runner:latest
+          value: ghcr.io/actions/actions-runner:latest
       - equal:
           path: spec.template.spec.containers[0].command[0]
           value: /home/runner/run.sh

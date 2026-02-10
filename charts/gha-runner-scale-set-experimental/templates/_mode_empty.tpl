@@ -6,7 +6,7 @@ Container spec that is expanded for the runner container
   {{ fail "You must provide a runner container specification in values.runner.container" }}
 {{- end }}
 name: runner
-image: {{ .Values.runner.container.image | default "ghcr.io/actions/runner:latest" }}
+image: {{ .Values.runner.container.image | default "ghcr.io/actions/actions-runner:latest" }}
 command: {{ toJson (default (list "/home/runner/run.sh") .Values.runner.container.command) }}
 
 {{ $tlsEnvItems := include "githubServerTLS.envItems" (dict "root" $ "existingEnv" (.Values.runner.container.env | default list)) }}
